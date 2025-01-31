@@ -2,6 +2,8 @@ from fastapi import FastAPI, Response
 from fastapi.responses import StreamingResponse
 import cv2
 import torch
+import time
+from collections import deque
 
 # 모델 가져오기(수정 필요)
 # from model import TmpModel
@@ -13,6 +15,37 @@ app = FastAPI()
 # yolov5 사용
 yolo = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 yolo.to('cpu')
+
+# 모델 입력, 졸음 시작시간, 운전자 상태
+input_frames = deque(maxlen=3)
+drowsy_start_time = None
+driver_state = 'normal'
+
+def update_state(frame):
+    global input_frames, drowsy_start_time, driver_state
+     
+    input_frames.append(frame)
+
+    if len(input_frames) == 3:
+        state = model(input_frames)
+
+        if state == 'drowsy':
+            if drowsy_start_time is None:
+                drowsy_start_time = time.time()
+                elapsed_time = time.time() - drowsy_start_time
+
+                if elapsed_time < 2:
+                    driver_state = 'normal'
+                elif 2 <= elapsed_time < 4:
+                    driver_state = 'dangerous'
+                else:
+                    driver_state = 'very dangerous'
+
+        else:
+            drowsy_start_time = None
+            driver_state = 'normal'
+
+    return driver_state
 
 def detect_faces(frame):
     with torch.no_grad():
@@ -33,6 +66,7 @@ def generate_frames():
         success, frame = cap.read()
         if not success:
             break
+        update_state(frame)
         frame = detect_faces(frame)
         # 프레임을 JPEG로 인코딩
         _, buffer = cv2.imencode('.jpg', frame)
