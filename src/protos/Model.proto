@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message Empty {}
+
+message Box {
+  float x = 1;
+  float y = 2;
+  float width = 3;
+  float height = 4;
+}
+
+message MirrorInfo {
+  string sdp = 1;
+  string type = 2;
+}
+
+message AttentionInfo {
+  double level = 1;
+  fixed32 minLevel = 2;
+  fixed32 maxLevel = 3;
+}
+
+message SpeakerInfo {
+  bool isMuted = 1;
+  float level = 2;
+}
+
+message TemperatureInfo {
+  double car = 1;
+  double driver = 2;
+  double passenger = 3;
+  double carAverage = 4;
+  double driverAverage = 5;
+  double passengerAverage = 6;
+}
+
+message Info {
+  AttentionInfo attention = 1;
+  SpeakerInfo speaker = 2;
+  TemperatureInfo temperature = 3;
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "Model.proto";
+
+service InfoService {
+  rpc FetchInfo (Empty) returns (stream Info) {}
+  rpc UpdateInfo (Info) returns (Empty) {}
+  rpc Offer (MirrorInfo) returns (MirrorInfo) {}
+}
