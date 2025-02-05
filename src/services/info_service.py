@@ -1,4 +1,6 @@
-from protos import Service_pb2
+import time
+
+from protos import Model_pb2, Service_pb2
 from common.state import State
 
 
@@ -6,17 +8,18 @@ class InfoService:
     def fetch_info(self):
         state = State()
         while True:
-            yield Service_pb2.Info(
-                attention=Service_pb2.AttentionInfo(
+            state.randomize()
+            yield Model_pb2.Info(
+                attention=Model_pb2.AttentionInfo(
                     level=state.attention,
                     minLevel=state.attentionMinLevel,
                     maxLevel=state.attentionMaxLevel,
                 ),
-                speaker=Service_pb2.SpeakerInfo(
+                speaker=Model_pb2.SpeakerInfo(
                     isMuted=state.isMuted,
                     level=state.soundLevel,
                 ),
-                temperature=Service_pb2.TemperatureInfo(
+                temperature=Model_pb2.TemperatureInfo(
                     car=state.carTemp,
                     driver=state.driverTemp,
                     passenger=state.passengerTemp,
@@ -25,6 +28,7 @@ class InfoService:
                     passengerAverage=state.passengerAverageTemp,
                 )
             )
+            time.sleep(0.5)
 
     def update_info(self, request):
         state = State()
@@ -41,4 +45,4 @@ class InfoService:
         state.passengerAverageTemp = request.temperature.passengerAverage
 
     def offer(self, request):
-        return Service_pb2.MirrorInfo(sdp=request.sdp, type=request.type)
+        return Model_pb2.MirrorInfo(sdp=request.sdp, type=request.type)
